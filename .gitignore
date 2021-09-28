@@ -1,0 +1,6 @@
+__pycache__
+.qt_for_python/
+build/
+dist/
+*.egg*
+*.png

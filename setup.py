@@ -10,4 +10,3 @@ setup(
     scripts=["tsm"],
     py_modules=["table", "window", "tsm"],
 )
-

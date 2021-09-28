@@ -451,6 +451,7 @@ if len(sys.argv) < 3:
     print(
         f"Two arguments need to be given:\n1)a path to the directory from which to load images\n2)a path to (existing/new) save name (without extension!, will be placed inside directory argument"
     )
+    sys.exit()
 saveName = sys.argv[2]
 window.content.loadDirectory(sys.argv[1])
 window.content.load(saveName)

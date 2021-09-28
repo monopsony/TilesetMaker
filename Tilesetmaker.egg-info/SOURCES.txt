@@ -1,8 +1,0 @@
-setup.py
-table.py
-tsm
-window.py
-Tilesetmaker.egg-info/PKG-INFO
-Tilesetmaker.egg-info/SOURCES.txt
-Tilesetmaker.egg-info/dependency_links.txt
-Tilesetmaker.egg-info/top_level.txt
