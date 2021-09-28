@@ -3,7 +3,7 @@ import sys, glob, os, pickle, math
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QHeaderView, QTreeWidgetItem, QShortcut
+from PyQt5.QtWidgets import QHeaderView, QTreeWidgetItem, QShortcut, QTableWidgetItem
 from window import Ui_Form
 from PIL.ImageQt import ImageQt
 from PIL import Image, ImageDraw, ImageOps
@@ -166,8 +166,8 @@ class cellEntries:
         self.entries[pos] = parent
 
         nCols, nRows = math.ceil(w / self.tileSize), math.ceil(h / self.tileSize)
-        for i in range(w // self.tileSize):
-            for j in range(w // self.tileSize):
+        for j in range(nCols):
+            for i in range(nRows):
                 if i == j == 0:
                     continue
                 pos2 = (pos[0] + j, pos[1] + i)
@@ -273,6 +273,8 @@ class Content(QtWidgets.QWidget, Ui_Form):
             self.treeSelectionChanged
         )
 
+        self.treeWidget.itemDoubleClicked.connect(self.updateSelectionHighlight)
+
     cellEntries = None
 
     def newImage(self, tileSize, nRows, nCols):
@@ -346,6 +348,33 @@ class Content(QtWidgets.QWidget, Ui_Form):
         self.flipH = False
         self.flipV = False
         self.updatePreview()
+        self.updateSelectionHighlight(reset=True)
+
+    def updateSelectionHighlight(self, *args, reset=False):
+        selected = self.selectedPath
+        cells = self.cellEntries.entries
+
+        tw = self.table.tableWidget
+
+        if reset:
+            for i in range(tw.rowCount()):
+                for j in range(tw.columnCount()):
+                    tableItem = tw.item(i, j)
+                    if tableItem is not None:
+                        tableItem.setBackground(QtGui.QColor(0, 0, 0, 0))
+            return
+
+        for pos, cell in cells.items():
+            i, j = pos
+            tableItem = tw.item(j, i)
+            if tableItem is None:
+                tableItem = QTableWidgetItem()
+                tw.setItem(j, i, tableItem)
+
+            if reset or (cell.imagePath != selected):
+                tableItem.setBackground(QtGui.QColor(0, 0, 0, 0))
+            else:
+                tableItem.setBackground(QtGui.QColor(0, 0, 255, 200))
 
     def addTile(self, row, col):
         if self.selectedPath is None:
@@ -434,7 +463,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
 
         self.content = Content()
-        self.resize(650, 450)
+        self.resize(1150, 950)
         self.setCentralWidget(self.content)
 
         self.rotateShortcut = QShortcut(QKeySequence("R"), self)

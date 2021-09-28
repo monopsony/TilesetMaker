@@ -21,3 +21,7 @@ When you exit, a <name>.p and <name>.png file are saved. If a <name>.p file is d
 -   E: flip selected tile vertically
 -   W: flip selected tile horizontally
 -   Tab: select next unused tile
+
+## Extras:
+
+-   double click on tile to highlight all tiles in the grid where this tile is present in blue
