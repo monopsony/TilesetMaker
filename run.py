@@ -1,4 +1,5 @@
-#! python
+#!/usr/bin/python
+
 import sys, glob, os, pickle, math
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QKeySequence
@@ -445,16 +446,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.content.updatePreview()
 
 
-app = QtWidgets.QApplication(sys.argv)
-window = MainWindow()
-if len(sys.argv) < 3:
-    print(
-        f"Two arguments need to be given:\n1)a path to the directory from which to load images\n2)a path to (existing/new) save name (without extension!, will be placed inside directory argument"
-    )
-    sys.exit()
-saveName = sys.argv[2]
-window.content.loadDirectory(sys.argv[1])
-window.content.load(saveName)
-window.show()
-app.exec_()
-window.content.save()
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    if len(sys.argv) < 3:
+        print(
+            f"Two arguments need to be given:\n1)a path to the directory from which to load images\n2)a path to (existing/new) save name (without extension!, will be placed inside directory argument"
+        )
+        sys.exit()
+    saveName = sys.argv[2]
+    window.content.loadDirectory(sys.argv[1])
+    window.content.load(saveName)
+    window.show()
+    app.exec_()
+    window.content.save()
+
+
+if __name__ == "__main__":
+    main()
