@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import sys, glob, os, pickle, math
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QKeySequence
@@ -9,6 +8,7 @@ from window import Ui_Form
 from PIL.ImageQt import ImageQt
 from PIL import Image, ImageDraw, ImageOps
 from table import Ui_Form as TableForm
+from itertools import chain
 
 tableStylesheet = """
 QTableWidget {background-color: transparent;}
@@ -143,6 +143,7 @@ class cellEntries:
                     print(
                         f"{x} not found in the cells despite all odds. Something could be wrong. To avoid shit like that make sure to only use images whose dimensions are a multiple of the tilesize"
                     )
+            self.updateUsedImagePaths()
 
         return parent, relatedEntries
 
@@ -171,13 +172,14 @@ class cellEntries:
                     continue
                 pos2 = (pos[0] + j, pos[1] + i)
                 self.entries[pos2] = cellEntry(pos2, imagePath, parent=parent)
+        self.updateUsedImagePaths()
 
         return parent
 
     def updateUsedImagePaths(self):
         used = set()
         for k, v in self.entries.items():
-            set.add(v.imagePath)
+            used.add(v.imagePath)
         self.usedImagePaths = used
 
     def save(self, path):
@@ -309,7 +311,10 @@ class Content(QtWidgets.QWidget, Ui_Form):
         tw = self.treeWidget
         tw.clear()
 
+    items = []
+
     def loadDirectory(self, path, parent=None):
+        self.items = []
         if parent is None:
             self.rootDir = path
             self.clearTreeWidget()
@@ -320,15 +325,23 @@ class Content(QtWidgets.QWidget, Ui_Form):
                 item.oriPath = None
                 self.loadDirectory(fil, item)
             elif fil.endswith(".png"):
+                pFile = fil.replace(".png", ".p")
+                if os.path.exists(pFile):
+                    # if .p file exists, it should mean it's a tilesheet file
+                    continue
                 item = QTreeWidgetItem(parent, [os.path.basename(fil)])
                 item.oriPath = fil
                 item.setIcon(0, QtGui.QIcon(QtGui.QPixmap(fil)))
+                self.items.append(fil)
 
     selectedPath = None
 
     def treeSelectionChanged(self, *args):
         item = self.treeWidget.selectedItems()[0]
-        self.selectedPath = item.oriPath
+        self.selectItem(item.oriPath)
+
+    def selectItem(self, path):
+        self.selectedPath = path
         self.rotation = 0
         self.flipH = False
         self.flipV = False
@@ -433,6 +446,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flipHShortcut = QShortcut(QKeySequence("E"), self)
         self.flipHShortcut.activated.connect(self.changeFlipH)
 
+        self.nextUnusedShortcut = QShortcut(QKeySequence("tab"), self)
+        self.nextUnusedShortcut.activated.connect(self.nextUnused)
+
     def changeRotation(self):
         self.content.rotation = (self.content.rotation + 90) % 360
         self.content.updatePreview()
@@ -445,13 +461,34 @@ class MainWindow(QtWidgets.QMainWindow):
         self.content.flipH = not self.content.flipH
         self.content.updatePreview()
 
+    def nextUnused(self):
+        used = self.content.cellEntries.usedImagePaths
+        selected = self.content.selectedPath
+
+        items = self.content.items
+        try:
+            selectedIndex = items.index(selected)
+        except ValueError:
+            selectedIndex = 0
+
+        indexList = chain(
+            range(selectedIndex + 1, len(items)), range(selectedIndex + 1)
+        )
+        # for x in self.content.items:
+        for i in indexList:
+            x = self.content.items[i]
+            if x not in used:
+                return self.content.selectItem(x)
+
+        return self.content.selectItem(None)
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     if len(sys.argv) < 3:
         print(
-            f"Two arguments need to be given:\n1)a path to the directory from which to load images\n2)a path to (existing/new) save name (without extension!, will be placed inside directory argument"
+            f"Two arguments need to be given:\n1) a path to the directory from which to load images\n2) a path to (existing/new) save name (without extension!, will be placed inside directory argument"
         )
         sys.exit()
     saveName = sys.argv[2]
