@@ -9,6 +9,7 @@ from PIL.ImageQt import ImageQt
 from PIL import Image, ImageDraw, ImageOps
 from table import Ui_Form as TableForm
 from itertools import chain
+import numpy as np
 
 tableStylesheet = """
 QTableWidget {background-color: transparent;}
@@ -328,7 +329,8 @@ class Content(QtWidgets.QWidget, Ui_Form):
                 self.loadDirectory(fil, item)
             elif fil.endswith(".png"):
                 pFile = fil.replace(".png", ".p")
-                if os.path.exists(pFile):
+                pDarkFile = pFile.replace("_darkened.png", ".p")
+                if os.path.exists(pFile) or os.path.exists(pDarkFile):
                     # if .p file exists, it should mean it's a tilesheet file
                     continue
                 item = QTreeWidgetItem(parent, [os.path.basename(fil)])
@@ -512,21 +514,80 @@ class MainWindow(QtWidgets.QMainWindow):
         return self.content.selectItem(None)
 
 
-def main():
+def commandOpen(*args):
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
-    if len(sys.argv) < 3:
+    if len(args) < 3:
         print(
             f"Two arguments need to be given:\n1) a path to the directory from which to load images\n2) a path to (existing/new) save name (without extension!, will be placed inside directory argument"
         )
         sys.exit()
-    saveName = sys.argv[2]
-    window.content.loadDirectory(sys.argv[1])
+    saveName = args[2]
+    window.content.loadDirectory(args[1])
     window.content.load(saveName)
     window.show()
     app.exec_()
     window.content.save()
 
 
+def commandDarken(*args):
+    if len(args) < 6:
+        print(
+            f"5 arguments need to be given:\n1) a path to sheet to darken\n2-5) RGBA values (0-1) of the filter"
+        )
+        sys.exit()
+
+    path = args[1]
+    r, g, b, a = [float(x) for x in args[2:6]]
+    rgb = np.array([r, g, b])
+
+    image = Image.open(path)
+    pixels = np.array(image) / 255
+
+    ## looping through it manually instead of using numpy properly
+    ## because performance shouldnt matter and I wanna exclude 0-alpha pixels
+    ## without having to use np.where and shit like that
+
+    for i in range(pixels.shape[0]):
+        for j in range(pixels.shape[1]):
+            p = pixels[i, j]
+
+            aij = p[3]
+            at = aij + a
+
+            if aij == 0:
+                continue
+
+            p[:3] = rgb * a + p[:3] * (1 - a)
+            p[3] = a + aij - a * aij
+
+    im = Image.fromarray(np.uint8(pixels * 255))
+    darkPath = path.replace(".png", "_darkened.png")
+    im.save(darkPath)
+
+
+def main():
+
+    if len(sys.argv) < 2:
+        print("You need to supply a main command (e.g. open/filter")
+        sys.exit()
+
+    command = sys.argv[1]
+    if command == "open":
+        commandOpen(*sys.argv[1:])
+
+    elif command == "darken":
+        commandDarken(*sys.argv[1:])
+
+    else:
+        print(f"Command {command} not recognised")
+
+
 if __name__ == "__main__":
+
     main()
+
+# 1 - p = (1 - p1) * (1-p2)
+# p = 1 - (1 - p1) * (1-p2)
+# p = 1 - 1 + p2 + p1 - p1*p2
+# ==> p = p2 + p1 - p1*p2
