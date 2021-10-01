@@ -89,7 +89,7 @@ class cellEntry:
     ):
         self.parent = parent
         self.position = pos
-        self.imagePath = imagePath
+        self.imagePath = os.path.basename(imagePath)
         self.rotation = rotation
         self.flipH = flipH
         self.flipV = flipV
