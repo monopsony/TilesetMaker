@@ -196,11 +196,24 @@ class cellEntries:
             return
 
         img = cell.imagePath
-        img = Image.open(img)
-        img, _ = applyTransform(img, cell.rotation, cell.flipH, cell.flipV)
-
+        path = self.content.baseToPath.get(img, None)
         row, col = pos
-        image.paste(img, (row * self.tileSize, col * self.tileSize))
+        if path is None:
+            draw = ImageDraw.Draw(image)
+            x1, y1, x2, y2 = (
+                row * self.tileSize,
+                col * self.tileSize,
+                (row + 1) * self.tileSize,
+                (col + 1) * self.tileSize,
+            )
+            draw.rectangle((x1, y1, x2, y2), fill="red")
+            print(
+                f"No image found with basename {img}. Replaced visuals with red tile."
+            )
+        else:
+            img = Image.open(self.content.baseToPath[img])
+            img, _ = applyTransform(img, cell.rotation, cell.flipH, cell.flipV)
+            image.paste(img, (row * self.tileSize, col * self.tileSize))
 
 
 class tableOverlay(QtWidgets.QWidget, TableForm):
@@ -294,8 +307,11 @@ class Content(QtWidgets.QWidget, Ui_Form):
         if name is None:
             sys.exit("???")
 
-        self.imageSavePath = os.path.join(self.rootDir, f"{name}.png")
-        self.cellEntriesPath = os.path.join(self.rootDir, f"{name}.p")
+        name = name.replace(".p", "")
+        name = name.replace(".png", "")
+
+        self.imageSavePath = f"{name}.png"
+        self.cellEntriesPath = f"{name}.p"
         self.loadCellEntries(self.cellEntriesPath)
         ce = self.cellEntries
         self.newImage(ce.tileSize, ce.nRow, ce.nCol)
@@ -315,6 +331,7 @@ class Content(QtWidgets.QWidget, Ui_Form):
         tw.clear()
 
     items = []
+    baseToPath = {}
 
     def loadDirectory(self, path, parent=None):
         self.items = []
@@ -337,6 +354,14 @@ class Content(QtWidgets.QWidget, Ui_Form):
                 item.oriPath = fil
                 item.setIcon(0, QtGui.QIcon(QtGui.QPixmap(fil)))
                 self.items.append(fil)
+
+                basename = os.path.basename(fil)
+                if basename in self.baseToPath:
+                    print(
+                        f"Duplicate tile name found!:\n- {fil} \n- {self.baseToPath[basename]}"
+                    )
+                else:
+                    self.baseToPath[basename] = fil
 
     selectedPath = None
 
@@ -449,6 +474,7 @@ class Content(QtWidgets.QWidget, Ui_Form):
         self.previewText.setText(label)
 
     def save(self):
+        del self.cellEntries.content
         self.cellEntries.save(self.cellEntriesPath)
         self.image.save(self.imageSavePath)
 
@@ -456,8 +482,13 @@ class Content(QtWidgets.QWidget, Ui_Form):
         if os.path.exists(path):
             with open(path, "rb") as fil:
                 self.cellEntries = pickle.load(fil)
+
+                for _, entry in self.cellEntries.entries.items():
+                    entry.imagePath = os.path.basename(entry.imagePath)
         else:
             self.cellEntries = cellEntries(16, 50, 50)
+
+        self.cellEntries.content = self
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -542,6 +573,8 @@ def commandDarken(*args):
     rgb = np.array([r, g, b])
 
     image = Image.open(path)
+    if image.mode == "RGB":
+        image.putalpha(255)
     pixels = np.array(image) / 255
 
     ## looping through it manually instead of using numpy properly

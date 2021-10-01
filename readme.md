@@ -15,11 +15,11 @@ The first argument <command> decides which part of tsm to use. Each command has 
 
 ### open
 
-Full command: `tsm open <directory> <name>`
+Full command: `tsm open <directory> <picklePath>`
 
-Here, `<directory>` is the directory within which your assets are found. Only png files are considered. The search is recursive. Finally, <name> is the name you want to give to your sheet. At the moment, sheets have a default width/height because Im lazy.
+Here, `<directory>` is the directory within which your assets are found. Only png files are considered. The search is recursive. Finally, <picklePath> is the path you want to give to your sheet. At the moment, sheets have a default width/height because Im lazy.
 
-When you exit, a <name>.p and <name>.png file are saved. If a <name>.p file is detected in the <directory> you gave, this file is automatically loaded.
+When you exit, a <picklePath>.p and <picklePath>.png file are saved. If a <picklePath>.p file already exists, this file is automatically loaded.
 
 ### darken
 

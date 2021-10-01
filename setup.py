@@ -6,7 +6,7 @@ from os import path
 # Scripts
 setup(
     name="Tilesetmaker",
-    version="0.1",
+    version="0.1.1",
     description="Make tilesets",
     author="Groog",
     py_modules=["table", "window", "run"],
