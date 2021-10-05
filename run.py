@@ -277,6 +277,8 @@ class tableOverlay(QtWidgets.QWidget, TableForm):
 
 
 class Content(QtWidgets.QWidget, Ui_Form):
+    scale = 1
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -289,13 +291,27 @@ class Content(QtWidgets.QWidget, Ui_Form):
 
         self.treeWidget.itemDoubleClicked.connect(self.updateSelectionHighlight)
 
+        self.scaleSlider.valueChanged.connect(self.scaleChanged)
+
     cellEntries = None
+
+    def scaleChanged(self, scale):
+        self.scale = scale
+        self.applyScale()
+        self.scaleSlider.setValue(scale)
+        self.label_2.setText(f"Scale: {scale}")
+
+    def applyScale(self):
+        self.table.setDimensions(self.scale * 16, self.table.nRows, self.table.nCols)
+        self.updateImage()
 
     def newImage(self, tileSize, nRows, nCols):
         self.tileSize = tileSize
         self.image = Image.new(
             "RGBA", (tileSize * nCols, tileSize * nRows), (0, 0, 0, 0)
         )
+        self.image.baseX, self.image.baseY = self.image.size
+
         # self.image = Image.open("Bush_prop_0.png")
         self.updateImage()
         self.table.setDimensions(tileSize, nRows, nCols)
@@ -324,7 +340,12 @@ class Content(QtWidgets.QWidget, Ui_Form):
     def updateImage(self):
         im = self.image
         qim = ImageQt(im)
-        self.label.setPixmap(QtGui.QPixmap.fromImage(qim))
+        # smaller_pixmap = pixmap.scaled(32, 32, Qt.KeepAspectRatio, Qt.FastTransformation)
+        x, y = self.image.size
+        pixmap = QtGui.QPixmap.fromImage(qim).scaled(
+            x * self.scale, x * self.scale, Qt.KeepAspectRatio, Qt.FastTransformation
+        )
+        self.label.setPixmap(pixmap)
 
     def clearTreeWidget(self):
         tw = self.treeWidget
@@ -510,6 +531,36 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.nextUnusedShortcut = QShortcut(QKeySequence("tab"), self)
         self.nextUnusedShortcut.activated.connect(self.nextUnused)
+
+        self.scale1Shortcut = QShortcut(QKeySequence("1"), self)
+        self.scale1Shortcut.activated.connect(self.setScale1)
+
+        self.scale2Shortcut = QShortcut(QKeySequence("2"), self)
+        self.scale2Shortcut.activated.connect(self.setScale2)
+
+        self.scale3Shortcut = QShortcut(QKeySequence("3"), self)
+        self.scale3Shortcut.activated.connect(self.setScale3)
+
+        self.scale4Shortcut = QShortcut(QKeySequence("4"), self)
+        self.scale4Shortcut.activated.connect(self.setScale4)
+
+        self.scale5Shortcut = QShortcut(QKeySequence("5"), self)
+        self.scale5Shortcut.activated.connect(self.setScale5)
+
+    def setScale1(self):
+        self.content.scaleChanged(1)
+
+    def setScale2(self):
+        self.content.scaleChanged(2)
+
+    def setScale3(self):
+        self.content.scaleChanged(3)
+
+    def setScale4(self):
+        self.content.scaleChanged(4)
+
+    def setScale5(self):
+        self.content.scaleChanged(5)
 
     def changeRotation(self):
         self.content.rotation = (self.content.rotation + 90) % 360

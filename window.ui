@@ -40,6 +40,35 @@
     <widget class="QWidget" name="widget_2" native="true">
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
+       <widget class="QWidget" name="widget_4" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Scale: 1</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="scaleSlider">
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>5</number>
+           </property>
+           <property name="sliderPosition">
+            <number>1</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
        <widget class="QWidget" name="widget_3" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
@@ -82,8 +111,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>560</width>
-           <height>546</height>
+           <width>580</width>
+           <height>503</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
