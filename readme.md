@@ -19,13 +19,13 @@ Full command: `tsm open <directory> <picklePath>`
 
 Here, `<directory>` is the directory within which your assets are found. Only png files are considered. The search is recursive. Finally, <picklePath> is the path you want to give to your sheet. At the moment, sheets have a default width/height because Im lazy.
 
-When you exit, a <picklePath>.p and <picklePath>.png file are saved. If a <picklePath>.p file already exists, this file is automatically loaded.
+When you exit, a `<picklePath>.p` and `<picklePath>.png` file are saved. If a `<picklePath>.p` file already exists, this file is automatically loaded.
 
 ### darken
 
 Full command: `tsm darken <imagePath> <r> <g> <b> <a>`
 
-Here, \<imagePath\> is a path to the image you want to darken. Arguments \<r\>, \<g\>, \<b\>, \<a\> are the color and alpha values of the filter to be applied (from 0-1). Output will be saved at \<imagePath\>\_darkened.png.
+Here, `<imagePath>` is a path to the image you want to darken. Arguments `<r>, <g>, <b>, <a>` are the color and alpha values of the filter to be applied (from 0-1). Output will be saved at `<imagePath>_darkened.png`.
 
 ## Hotkeys:
 
