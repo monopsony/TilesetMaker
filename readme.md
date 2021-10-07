@@ -25,7 +25,7 @@ When you exit, a <picklePath>.p and <picklePath>.png file are saved. If a <pickl
 
 Full command: `tsm darken <imagePath> <r> <g> <b> <a>`
 
-Here, <imagePath> is a path to the image you want to darken. Arguments \<r\>, \<g\>, \<b\>, \<a\> are the color and alpha values of the filter to be applied (from 0-1). Output will be saved at <imagePath>\_darkened.png.
+Here, \<imagePath\> is a path to the image you want to darken. Arguments \<r\>, \<g\>, \<b\>, \<a\> are the color and alpha values of the filter to be applied (from 0-1). Output will be saved at \<imagePath\>\_darkened.png.
 
 ## Hotkeys:
 
