@@ -33,6 +33,7 @@ Here, <imagePath> is a path to the image you want to darken. Arguments \<r\>, \<
 -   E: flip selected tile vertically
 -   W: flip selected tile horizontally
 -   Tab: select next unused tile
+-   1-5: Select zoom level
 
 ## Extras:
 
